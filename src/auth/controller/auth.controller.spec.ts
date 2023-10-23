@@ -1,12 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../service/auth.service';
-import { ToGetUsers } from '../service/service.types';
+import {
+  ForToken,
+  ToGetUsers,
+  ToServiceGetusers,
+} from '../service/service.types';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Users } from '../../entities/users.entity';
 import * as request from 'supertest';
 import { INestApplication } from '@nestjs/common';
-import { ForToken } from '../dto/auth.dto';
 
 describe('testing auth controller', () => {
   let authController: AuthController;
@@ -38,9 +41,11 @@ describe('testing auth controller', () => {
     it('should return an array of users', async () => {
       jest
         .spyOn(authService, 'getUsers')
-        .mockImplementation(async (token: string) => {
-          return result;
-        });
+        .mockImplementation(
+          async (token: ForToken): Promise<ToServiceGetusers> => {
+            return { json: { message: 'smth', data: null }, status: 200 };
+          },
+        );
 
       return request(app.getHttpServer())
         .get('/users')

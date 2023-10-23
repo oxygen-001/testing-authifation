@@ -1,24 +1,28 @@
 import { Controller, Get, Headers, Post, Body, Res } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { Response } from 'express';
-import { ForToken, UserInfo } from '../dto/auth.dto';
+import { UserInfo } from '../dto/auth.dto';
+import { ForToken } from '../service/service.types';
 
 @Controller('/users')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get()
-  async getUsers(@Headers() token: string, @Res() response: Response) {
-    return response.send(await this.authService.getUsers(token, response));
+  async getUsers(@Headers() token: ForToken, @Res() response: Response) {
+    const responseOfUsers = await this.authService.getUsers(token, response);
+    return response.status(responseOfUsers.status).json(responseOfUsers.json);
   }
 
   @Post('signup')
-  signUp(@Body() body: UserInfo) {
-    return this.authService.signUp(body);
+  async signUp(@Body() body: UserInfo, @Res() response: Response) {
+    const responseOfUsers = await this.authService.signUp(body);
+    return response.status(responseOfUsers.status).json(responseOfUsers.json);
   }
 
   @Post('signin')
-  signIn(@Body() body: UserInfo) {
-    return this.authService.signIn(body);
+  async signIn(@Body() body: UserInfo, @Res() response: Response) {
+    const responseOfUsers = await this.authService.signIn(body);
+    return response.status(responseOfUsers.status).json(responseOfUsers.json);
   }
 }

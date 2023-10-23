@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ToGetUsers, UserInfo } from './service.types';
+import { ForToken, ToServiceGetusers, UserInfo } from './service.types';
 import 'dotenv/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Users } from '../../entities/users.entity';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { ForToken } from '../dto/auth.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -16,40 +16,122 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async getUsers(token: string, response: Response): Promise<ToGetUsers[]> {
+  async getUsers(
+    token: ForToken,
+    response: Response,
+  ): Promise<ToServiceGetusers> {
     try {
-      return await this.UserRepository.find();
+      if (!token.authorization) {
+        return {
+          status: 400,
+          json: { message: 'You must give the token', data: null },
+        };
+      }
+
+      const clearlyToken: string = token.authorization.slice(
+        7,
+        token.authorization.length,
+      );
+
+      const decoded = this.jwtService.decode(clearlyToken);
+
+      if (!decoded) {
+        return {
+          status: 400,
+          json: { message: 'invalid token', data: null },
+        };
+      }
+
+      return {
+        status: 200,
+        json: {
+          message: 'successfully',
+          data: await this.UserRepository.find(),
+        },
+      };
     } catch (error: any) {
       console.log(error);
     }
   }
 
-  async signUp(body: UserInfo) {
+  async signUp(body: UserInfo): Promise<ToServiceGetusers> {
     try {
-      const newUser = this.UserRepository.create(body);
+      const findUser = await this.UserRepository.findOneBy({
+        username: body.username,
+      });
 
-      await this.UserRepository.save(newUser);
-      return newUser;
+      if (findUser) {
+        return {
+          status: 400,
+          json: { message: 'user is already exist', data: null },
+        };
+      }
+
+      const toHash = bcrypt.hashSync(body.password, 10);
+
+      const newUser = await this.UserRepository.save({
+        username: body.username,
+        password: toHash,
+      });
+
+      const token = this.jwtService.sign({ id: newUser.id });
+
+      return {
+        status: 200,
+        json: {
+          message: 'successfully',
+          data: {
+            username: body.username,
+            password: toHash,
+            id: newUser.id,
+            token,
+          },
+        },
+      };
     } catch (error: any) {
       console.log(error.message);
     }
   }
 
-  async signIn(body: UserInfo) {
+  async signIn(body: UserInfo): Promise<ToServiceGetusers> {
     try {
       const findUser = await this.UserRepository.findOneBy({
         username: body.username,
       });
 
       if (!findUser) {
-        return 'user is not found';
+        return {
+          status: 404,
+          json: { message: 'user is not found', data: null },
+        };
       }
 
-      if (findUser.password !== body.password) {
-        return 'invalid username or password';
+      const verifyPassword: boolean = await bcrypt.compare(
+        body.password,
+        findUser.password,
+      );
+
+      if (!verifyPassword) {
+        return {
+          status: 400,
+          json: { message: 'invalid username or password', data: null },
+        };
       }
 
-      return findUser;
+      const token = this.jwtService.sign({ id: findUser.id });
+
+      return {
+        status: 200,
+        json: {
+          message: 'successfully',
+          data: {
+            username: body.username,
+            password: findUser.password,
+            id: findUser.id,
+            token,
+          },
+        },
+      };
     } catch (error: any) {
       console.log(error.message);
     }
