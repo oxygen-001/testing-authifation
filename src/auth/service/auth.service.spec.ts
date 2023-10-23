@@ -1,7 +1,3 @@
-import { Repository } from 'typeorm';
-import { AuthService } from './auth.service';
-import { Users } from 'src/entities/users.entity';
-
 describe('auth service', () => {
   let authService = {
     getUsers: () => [{ username: 'user', password: 'password' }],
@@ -10,7 +6,7 @@ describe('auth service', () => {
   };
 
   it('get users', async () => {
-    const users = await authService.getUsers();
+    const users = authService.getUsers();
 
     expect(users).toStrictEqual([{ username: 'user', password: 'password' }]);
   });

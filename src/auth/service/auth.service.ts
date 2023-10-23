@@ -1,21 +1,22 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { Response } from 'express';
+import { Injectable } from '@nestjs/common';
 import { ToGetUsers, UserInfo } from './service.types';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import 'dotenv/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Users } from '../../entities/users.entity';
+import { Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { ForToken } from '../dto/auth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Users)
     private UserRepository: Repository<Users>,
+    private jwtService: JwtService,
   ) {}
 
-  async getUsers(token: string): Promise<ToGetUsers[]> {
+  async getUsers(token: string, response: Response): Promise<ToGetUsers[]> {
     try {
       return await this.UserRepository.find();
     } catch (error: any) {
@@ -25,7 +26,7 @@ export class AuthService {
 
   async signUp(body: UserInfo) {
     try {
-      const newUser = await this.UserRepository.create(body);
+      const newUser = this.UserRepository.create(body);
 
       await this.UserRepository.save(newUser);
       return newUser;
@@ -34,7 +35,7 @@ export class AuthService {
     }
   }
 
-  async singIn(body: UserInfo) {
+  async signIn(body: UserInfo) {
     try {
       const findUser = await this.UserRepository.findOneBy({
         username: body.username,

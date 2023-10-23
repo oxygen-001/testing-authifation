@@ -1,23 +1,15 @@
-import {
-  Controller,
-  Get,
-  Res,
-  Headers,
-  Post,
-  Response,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Headers, Post, Body, Res } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
-import { Response as ResponseExpress } from 'express';
-import { ToGetUsers, UserInfo } from '../service/service.types';
+import { Response } from 'express';
+import { ForToken, UserInfo } from '../dto/auth.dto';
 
 @Controller('/users')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get()
-  getUsers(@Headers() token: string): Promise<ToGetUsers[]> {
-    return this.authService.getUsers(token);
+  async getUsers(@Headers() token: string, @Res() response: Response) {
+    return response.send(await this.authService.getUsers(token, response));
   }
 
   @Post('signup')
@@ -27,6 +19,6 @@ export class AuthController {
 
   @Post('signin')
   signIn(@Body() body: UserInfo) {
-    return this.authService.singIn(body);
+    return this.authService.signIn(body);
   }
 }
