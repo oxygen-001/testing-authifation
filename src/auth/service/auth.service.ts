@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { Users } from '../../entities/users.entity';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { BcryptService } from './bcrypt.service';
+// import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     @InjectRepository(Users)
     private UserRepository: Repository<Users>,
     private jwtService: JwtService,
+    private bcryptService: BcryptService,
   ) {}
 
   async getUsers(
@@ -67,7 +69,7 @@ export class AuthService {
         };
       }
 
-      const toHash = bcrypt.hashSync(body.password, 10);
+      const toHash = await this.bcryptService.hashPassword(body.password, 10);
 
       const newUser = await this.UserRepository.save({
         username: body.username,
@@ -106,7 +108,7 @@ export class AuthService {
         };
       }
 
-      const verifyPassword: boolean = await bcrypt.compare(
+      const verifyPassword: boolean = await this.bcryptService.decoded(
         body.password,
         findUser.password,
       );

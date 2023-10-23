@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { connection } from './config/connection';
 import { Users } from './entities/users.entity';
+import { Todos } from './entities/todos.entity';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { Users } from './entities/users.entity';
       username: 'postgres',
       password: 'password',
       database: 'test',
-      entities: [Users],
+      entities: [Users, Todos],
       synchronize: true,
     }),
   ],

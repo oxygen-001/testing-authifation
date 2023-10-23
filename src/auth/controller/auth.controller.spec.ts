@@ -8,7 +8,7 @@ import {
 } from '../service/service.types';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Users } from '../../entities/users.entity';
-import * as request from 'supertest';
+import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 
 describe('testing auth controller', () => {
