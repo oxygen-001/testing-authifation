@@ -33,12 +33,10 @@ export class TodoInfo {
   isCompleted: boolean;
 
   @ApiProperty({
-    required: true,
+    required: false,
     name: 'photo',
     description: 'to enter photo',
     type: 'string',
   })
-  @IsNotEmpty()
-  @IsString()
   photo: string;
 }

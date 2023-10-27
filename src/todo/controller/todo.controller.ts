@@ -14,6 +14,7 @@ import { ForToken } from 'src/auth/service/service.types';
 import { Response } from 'express';
 import { TodoInfo } from '../dto/todo.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @ApiTags('Todo')
 @ApiBearerAuth()
@@ -28,7 +29,19 @@ export class TodoController {
   }
 
   @Post('add')
-  @UseInterceptors(FileInterceptor('file', { dest: './uploads' }))
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename(req, file, callback) {
+          const uniqueSuffix =
+            Date.now() + Math.round(Math.random() * 1e9) + '_';
+          const filename = `${uniqueSuffix}__${file.originalname}`;
+          callback(null, filename);
+        },
+      }),
+    }),
+  )
   async addTodo(
     @Headers() token: ForToken,
     @Body() body: TodoInfo,
