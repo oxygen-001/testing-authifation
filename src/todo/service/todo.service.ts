@@ -12,8 +12,8 @@ import { TodoInfo } from '../dto/todo.dto';
 export class TodoService {
   constructor(
     @InjectRepository(Todos)
-    @InjectRepository(Users)
     private TodoRepository: Repository<Todos>,
+    @InjectRepository(Users)
     private UserRepository: Repository<Users>,
     private jwtService: JwtService,
   ) {}
