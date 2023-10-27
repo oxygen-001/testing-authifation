@@ -13,7 +13,10 @@ export class Todos {
   text: string;
 
   @Column({ default: false })
-  isCompleted: string;
+  isCompleted: boolean;
+
+  @Column({ nullable: false })
+  photo: string;
 
   @ManyToOne(() => Users, (user) => user.todos)
   user: Users;

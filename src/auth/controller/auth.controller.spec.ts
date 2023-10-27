@@ -12,7 +12,6 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 
 describe('testing auth controller', () => {
-  let authController: AuthController;
   let authService: AuthService;
 
   let app: INestApplication;

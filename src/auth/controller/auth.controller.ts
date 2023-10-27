@@ -3,7 +3,10 @@ import { AuthService } from '../service/auth.service';
 import { Response } from 'express';
 import { UserInfo } from '../dto/auth.dto';
 import { ForToken } from '../service/service.types';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
+@ApiBearerAuth()
 @Controller('/users')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

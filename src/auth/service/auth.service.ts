@@ -71,6 +71,8 @@ export class AuthService {
 
       const toHash = await this.bcryptService.hashPassword(body.password, 10);
 
+      console.log(toHash);
+
       const newUser = await this.UserRepository.save({
         username: body.username,
         password: toHash,

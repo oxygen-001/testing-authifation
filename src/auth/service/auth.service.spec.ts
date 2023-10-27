@@ -1,5 +1,3 @@
-jest.mock('bcrypt');
-
 describe('auth service', () => {
   let authService = {
     getUsers: () => [{ username: 'user', password: 'password' }],
